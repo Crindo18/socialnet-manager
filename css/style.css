@@ -1,67 +1,234 @@
 /* css/style.css */
 
-/* Bootstrap CSS custom property overrides */
+/* ── Google Fonts are loaded in index.html ── */
+
+/* ── CSS Custom Properties ── */
 :root {
   --font-heading: 'Source Serif 4', Georgia, serif;
   --font-body:    'DM Sans', system-ui, sans-serif;
-  --clr-header-bg:  #1e3a6e;
-  --clr-page-bg:   #dde3ec;
-  --clr-panel-bg:  #f7f8fa;
+
+  --clr-header-bg:    #1e3a6e;
+  --clr-header-text:  #ffffff;
+  --clr-page-bg:      #dde3ec;
+  --clr-panel-bg:     #f7f8fa;
   --clr-panel-border: #c8cdd8;
-  --clr-blue: #2456b4;
+  --clr-blue:         #2456b4;
+  --clr-list-active:  #2456b4;
+  --clr-status-bg:    #1e3a6e;
+  --clr-status-text:  #d0d8e8;
+
+  --header-h:    56px;
+  --statusbar-h: 36px;
+  --radius-lg:   10px;
+  --radius-sm:   6px;
+}
+
+/* ── Reset / Base ── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-body);
+  background: var(--clr-page-bg);
+  font-size: 14px;
 }
 
 html { scroll-behavior: smooth; }
 
-/* Application wrapper: full-height flex column layout */
+/* ── Application Header ── */
+#app-header {
+  background: var(--clr-header-bg);
+  color:      var(--clr-header-text);
+  height:     var(--header-h);
+  display:    flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+#app-title {
+  font-family: var(--font-heading);
+  font-size:   1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin: 0;
+  color: #ffffff;
+}
+
+/* ── App Wrapper: full height flex column ── */
 #app-wrapper {
-  height: calc(100% - var(--header-h));
+  height: calc(100vh - var(--header-h));
   display: flex;
   flex-direction: column;
 }
 
-/* Panel card styling */
-.sn-panel {   /* custom panel card */
-  background:     var(--clr-panel-bg);
-  border:         1px solid var(--clr-panel-border);
-  border-radius:  var(--radius-lg);
-  padding:        1rem 1.1rem;
-  flex: 1;  min-height: 0;  overflow: hidden;
+/* ── Main content area ── */
+#app-wrapper > main {
+  flex: 1;
+  overflow: auto;
 }
 
-/* Profile picture circular display */
-#profile-pic, .profile-thumb {
-  width: 96px;
-  height: 96px;
+/* ── Panel Cards ── */
+.sn-panel {
+  background:    var(--clr-panel-bg);
+  border:        1px solid var(--clr-panel-border);
+  border-radius: var(--radius-lg);
+  padding:       1rem 1.1rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+/* ── Profile list box (left panel) ── */
+.profile-list-box {
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid var(--clr-panel-border);
+  border-radius: var(--radius-sm);
+  background: #ffffff;
+  min-height: 80px;
+  padding: 0.25rem;
+}
+
+/* ── Profile list items ── */
+#profile-list .profile-item {
+  display: flex;
+  align-items: center;
+  padding: 0.45rem 0.75rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  border: 1px solid transparent;
+  margin-bottom: 2px;
+  font-size: 0.88rem;
+  color: #333;
+}
+
+#profile-list .profile-item:hover {
+  background: #e6ecf7;
+  border-color: #b5c5e0;
+}
+
+#profile-list .profile-item.active {
+  background:   var(--clr-list-active);
+  border-color: var(--clr-blue);
+  color:        #ffffff;
+  font-weight:  600;
+}
+
+/* ── Centre panel: Profile picture ── */
+#profile-pic,
+.profile-thumb {
+  width:      96px;
+  height:     96px;
   object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid var(--clr-panel-border);
+  background: #d0d8ea;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: block;
+  margin: 0 auto 0.75rem;
 }
 
-/* Profile picture hover effect */
 #profile-pic:hover {
   transform:  scale(1.05);
-  transition: transform 0.2s ease;
+  box-shadow: 0 4px 16px rgba(36,86,180,0.25);
 }
 
-/* Friends list item in centre panel */
+/* ── Profile hero name ── */
+.profile-hero-name {
+  font-family: var(--font-heading);
+  font-size:   1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #1a2a4a;
+}
+
+/* ── Text boxes (status, quote, friends) ── */
+.sn-textbox {
+  background:    #ffffff;
+  border:        1px solid var(--clr-panel-border);
+  border-radius: var(--radius-sm);
+  padding:       0.5rem 0.75rem;
+  font-size:     0.88rem;
+  color:         #444;
+  min-height:    38px;
+  text-align:    left;
+}
+
+.sn-textbox--tall {
+  min-height: 120px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* ── Friends list entries ── */
 #friends-list .friend-entry {
-  padding:   0.4rem 0.75rem;
-  font-size: 0.9rem;
+  padding:       0.4rem 0.75rem;
+  font-size:     0.88rem;
+  border-bottom: 1px solid #eef0f4;
+  color:         #2a2a2a;
 }
 
-/* Active profile highlight in left panel */
-#profile-list .profile-item.active {
-  background: var(--clr-list-active);
-  border-color: var(--clr-blue);
-  color:            #ffffff;
+#friends-list .friend-entry:last-child {
+  border-bottom: none;
 }
 
-/* Status bar at bottom */
-#status-bar {
-  background: var(--clr-status-bg);
-  height: var(--statusbar-h);
-  font-size: 0.82rem;
+.empty-state {
+  color: #aaa;
   font-style: italic;
+  padding: 0.5rem;
+  font-size: 0.85rem;
+}
+
+/* ── Custom coloured buttons ── */
+.sn-btn-blue {
+  background: var(--clr-blue);
+  color: #fff;
+  border: none;
+}
+.sn-btn-blue:hover { background: #1a3f8f; color: #fff; }
+
+.sn-btn-green {
+  background: #2a8a3e;
+  color: #fff;
+  border: none;
+}
+.sn-btn-green:hover { background: #1f6b30; color: #fff; }
+
+.sn-btn-orange {
+  background: #c8610a;
+  color: #fff;
+  border: none;
+}
+.sn-btn-orange:hover { background: #a34e08; color: #fff; }
+
+.sn-btn-dark {
+  background: #3a3a3a;
+  color: #fff;
+  border: none;
+}
+.sn-btn-dark:hover { background: #222; color: #fff; }
+
+/* ── Status bar ── */
+#status-bar {
+  background:  var(--clr-status-bg);
+  color:       var(--clr-status-text);
+  height:      var(--statusbar-h);
+  font-size:   0.82rem;
+  font-style:  italic;
   display:     flex;
   align-items: center;
-  padding:     0.5rem 1rem;
+  padding:     0 1rem;
+  flex-shrink: 0;
 }
+
+/* ── Scrollbar styling ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f0f0f0; border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: #b0bac8; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #8a96a8; }
