@@ -78,7 +78,7 @@ async function loadProfileList() {
   try {
     const { data, error } = await db
       .from('profiles')
-      .select('id, name')
+      .select('id, name, picture')
       .order('name', { ascending: true })
 
     if (error) throw error
@@ -93,10 +93,23 @@ async function loadProfileList() {
     }
 
     data.forEach(profile => {
-      const row  = document.createElement('div')
-      row.className    = 'profile-item'
-      row.dataset.id   = profile.id
-      row.textContent  = profile.name   // FIX: was using undefined `span`
+      const row = document.createElement('div')
+      row.className  = 'profile-item'
+      row.dataset.id = profile.id
+
+      // Avatar thumbnail
+      const img = document.createElement('img')
+      img.src       = profile.picture || 'resources/images/default.png'
+      img.alt       = profile.name
+      img.className = 'profile-list-avatar'
+      img.onerror   = () => { img.src = 'resources/images/default.png' }
+
+      // Name label
+      const span = document.createElement('span')
+      span.textContent = profile.name
+
+      row.appendChild(img)
+      row.appendChild(span)
       row.addEventListener('click', () => selectProfile(profile.id))
       container.appendChild(row)
     })
