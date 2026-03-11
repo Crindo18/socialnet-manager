@@ -245,6 +245,24 @@ html { scroll-behavior: smooth; }
   background:    #d0d8ea;
 }
 
-#profile-list .profile-item.active .profile-list-avatar {
-  border-color: rgba(255, 255, 255, 0.5);
+/* Adjust the max-height or height to fit your specific layout */
+#profile-list {
+  max-height: 60vh; /* Takes up 60% of the viewport height */
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* Optional styling for a cleaner look */
+  border: 1px solid #ccc; 
+  border-radius: 4px;
+}
+
+/* Optional: Make the scrollbar look nicer */
+#profile-list::-webkit-scrollbar {
+  width: 8px;
+}
+#profile-list::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+#profile-list::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }

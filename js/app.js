@@ -69,17 +69,33 @@ function renderFriendsList(friends) {
     list.appendChild(div)   // FIX: was `box.appendChild` — box is undefined
   })
 }
-
+function debounce(func, delay = 300) {
+  let timeoutId
+  return function (...args) {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => {
+      func.apply(this, args)
+    }, delay)
+  }
+}
 // ================================================================
 // Section 4: CRUD Functions
 // ================================================================
 
-async function loadProfileList() {
+async function loadProfileList(searchQuery = '') {
   try {
-    const { data, error } = await db
+    // Start building the query
+    let query = db
       .from('profiles')
       .select('id, name, picture')
       .order('name', { ascending: true })
+
+    // If a search term exists, add the ILIKE filter
+    if (searchQuery) {
+      query = query.ilike('name', `%${searchQuery}%`)
+    }
+
+    const { data, error } = await query
 
     if (error) throw error
 
@@ -118,7 +134,6 @@ async function loadProfileList() {
     setStatus(`Error loading profiles: ${err.message}`, true)
   }
 }
-
 async function selectProfile(profileId) {
   try {
     // Highlight active item
@@ -202,34 +217,16 @@ async function addProfile() {
   }
 }
 
+
 async function lookUpProfile() {
   const query = document.getElementById('input-name').value.trim()
+  
+  await loadProfileList(query)
 
-  if (!query) {
-    setStatus('Error: Search field is empty. Please enter a name to search.', true)
-    return
-  }
-
-  try {
-    const { data, error } = await db
-      .from('profiles')
-      .select('id, name')
-      .ilike('name', `%${query}%`)
-      .order('name', { ascending: true })
-      .limit(1)
-
-    if (error) throw error
-
-    if (data.length === 0) {
-      setStatus(`No profile found matching "${query}".`, true)
-      clearCentrePanel()
-      return
-    }
-
-    await selectProfile(data[0].id)
-
-  } catch (err) {
-    setStatus(`Error looking up profile: ${err.message}`, true)
+  if (query) {
+    setStatus(`Filtered profiles by "${query}".`)
+  } else {
+    setStatus('Showing all profiles.')
   }
 }
 
@@ -453,8 +450,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ── Left panel ────────────────────────────────────────────────
   document.getElementById('btn-add')
     .addEventListener('click', addProfile)
-  document.getElementById('btn-lookup')
-    .addEventListener('click', lookUpProfile)
+  document.getElementById('btn-clear').addEventListener('click', async () => {
+  const nameInput = document.getElementById('input-name')
+  nameInput.value = '' // Clear the input field
+  await lookUpProfile() // Re-run the lookup with an empty string to show all profiles
+})
   document.getElementById('btn-delete')
     .addEventListener('click', deleteProfile)
 
@@ -480,14 +480,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     .addEventListener('click', addFriend)
   document.getElementById('btn-remove-friend')
     .addEventListener('click', removeFriend)
+  // Enter in name field → Add Profile
+  document.getElementById('input-name')
+    .addEventListener('keydown', e => { if (e.key === 'Enter') addProfile() })
+
+  document.getElementById('input-name')
+    .addEventListener('input', debounce(lookUpProfile, 300))
 
   // ── Exit ──────────────────────────────────────────────────────
   document.getElementById('btn-exit')
     .addEventListener('click', () => {
       if (!window.close()) setStatus('To exit, close this browser tab.')
     })
-
+  
   // ── Initial data load ─────────────────────────────────────────
   await loadProfileList()
   setStatus('Ready. Select a profile from the list or add a new one.')
 })
+ 
