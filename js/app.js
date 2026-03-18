@@ -319,22 +319,57 @@ async function changePicture() {
     setStatus('Error: No profile is selected.', true)
     return
   }
-  const newPicture = document.getElementById('input-picture').value.trim()
-  if (!newPicture) {
-    setStatus('Error: Picture field is empty.', true)
+
+  const fileInput = document.getElementById('input-picture')
+  const file = fileInput.files[0]
+
+  if (!file) {
+    setStatus('Error: Please select an image file first.', true)
     return
   }
+
+  setStatus('Uploading and compressing image... Please wait.')
+
   try {
+    // 1. Pack the file into FormData
+    const formData = new FormData()
+    formData.append('file', file)
+
+    // 2. Send the file to our serverless API
+    const response = await fetch('/api/upload-avatar', {
+      method: 'POST',
+      body: formData // Note: We do NOT set the Content-Type header manually here
+    })
+
+    // 3. Safe Response Parsing (From Guide Section 6.3)
+    const rawText = await response.text();
+    let result;
+    try {
+      result = JSON.parse(rawText);
+    } catch {
+      const preview = rawText.slice(0, 200).replace(/\s+/g, " ").trim();
+      throw new Error("HTTP " + response.status + " (not JSON). " +
+                      ' | Response: "' + preview + '"')
+    }
+
+    if (!response.ok) {
+      throw new Error(result.error || `HTTP ${response.status} Error`);
+    }
+
+    const newPictureUrl = result.url;
+
+    // 4. Save the new URL to Supabase
     const { error } = await db
       .from('profiles')
-      .update({ picture: newPicture })
+      .update({ picture: newPictureUrl })
       .eq('id', currentProfileId)
 
     if (error) throw error
 
-    document.getElementById('profile-pic').src = newPicture
-    document.getElementById('input-picture').value = ''
-    setStatus('Picture updated.')
+    // 5. Update the UI
+    document.getElementById('profile-pic').src = newPictureUrl
+    fileInput.value = '' // Clear the input box
+    setStatus('Picture successfully updated!')
 
   } catch (err) {
     setStatus(`Error updating picture: ${err.message}`, true)
